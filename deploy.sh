@@ -158,6 +158,7 @@ fi;
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=480s ||  { echo 'Nginx service is not ready within the expected time limit.';  exit 1; }
 
 # Install APIM using helm.
+docker login https://docker.wso2.com/ -u "$WSO2_SUBSCRIPTION_USERNAME" -p "$WSO2_SUBSCRIPTION_PASSWORD"
 helm repo add wso2 https://helm.wso2.com && helm repo update ||  { echo 'Error while adding WSO2 helm repository to helm.';  exit 1; }
 helm dependency build "kubernetes-apim/${path_to_helm_folder}" ||  { echo 'Error while building helm folder : kubernetes-apim/${path_to_helm_folder}.';  exit 1; }
 helm install apim "kubernetes-apim/${path_to_helm_folder}" \
@@ -182,6 +183,8 @@ helm install apim "kubernetes-apim/${path_to_helm_folder}" \
     --set wso2.deployment.am.readinessProbe.initialDelaySeconds=200 \
     --set wso2.deployment.dependencies.nfsServerProvisioner=false \
     --set wso2.deployment.mi.replicas=0 \
+    --set wso2.subscription.username="$WSO2_SUBSCRIPTION_USERNAME" \
+    --set wso2.subscription.password="$WSO2_SUBSCRIPTION_PASSWORD" \
     --namespace "${kubernetes_namespace}" --create-namespace \
     ||  { echo 'Error while instaling APIM to cluster.';  exit 1; }
 
